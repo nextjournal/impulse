@@ -1,0 +1,8 @@
+{:paths ["src" "resources"]
+ :deps {http-kit/http-kit {:mvn/version "2.8.0"}
+        ring/ring-core {:mvn/version "1.12.1"}
+        hiccup/hiccup {:mvn/version "2.0.0-RC3"}
+        io.github.nextjournal/garden-id {:git/sha "7d19e5400b9ac9082e444f2c0e96d9b5e616a483"}
+        io.github.nextjournal/garden-email {:git/sha "e312764cfaa31e8e47f5f2c0207dcbed67873187"}
+        duratom/duratom {:mvn/version "0.5.9"}
+        metosin/reitit {:mvn/version "0.7.2"}}}
