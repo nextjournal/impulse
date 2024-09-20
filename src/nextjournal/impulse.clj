@@ -1,17 +1,18 @@
 (ns nextjournal.impulse
   (:require [duratom.core :refer [duratom]]
-            [nextjournal.garden-id :as garden-id]
-            [nextjournal.garden-email :as garden-email]
-            [reitit.ring :as rr]
-            [hiccup2.core :as h]
             [hiccup.page :refer [html5 include-css include-js]]
-            [ring.util.response :refer [response response? not-found content-type]]
+            [hiccup2.core :as h]
+            [nextjournal.garden-email :as garden-email]
+            [nextjournal.garden-id :as garden-id]
+            [org.httpkit.server :as server]
+            [reitit.ring :as rr]
             [ring.middleware.content-type :refer [wrap-content-type]]
-            [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.params :refer [wrap-params]]
+            [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.session :refer [wrap-session]]
             [ring.middleware.session.memory :refer [memory-store]]
-            [org.httpkit.server :as server]))
+            [ring.util.codec :as codec]
+            [ring.util.response :refer [response response? not-found content-type]]))
 
 (defonce
   ^{:doc "An atom containing in-memory session info."}
@@ -91,6 +92,41 @@
         (reset! !server nil))
     (throw (ex-info "Server not running" {}))))
 
+(defn symbol->path
+  "Turn a symbol into a urlsafe path"
+  [symbol]
+  ;;FIXME
+  (str "/" symbol))
+
+(defonce !routes (atom {}))
+(defn request? [r]
+  (and (map? r)
+       ;;FIXME
+       (contains? r :body)))
+
+(def ^:dynamic *req*)
+
+(defmacro defhandler
+  "Create a request handler
+  (defhandler foo [a b] (str a b))
+    {:hx-post (foo 1 2)}"
+  [name method args & body]
+  (if-not (keyword? method)
+    `(defhandler ~name :post ~method ~args ~@body)
+    (let [path (symbol->path name)
+          req (gensym "req")
+          definition (cond->
+                         `(defn ~name
+                            ([~req] (if (request? ~req)
+                                      (let [{:strs ~args} (:query-params ~req)]
+                                        (binding [*req* ~req] ~@body))
+                                      (str ~path "?" (codec/form-encode ~{(keyword (first args)) req})))))
+                       (= 0 (count args)) (concat `((~args ~path)))
+                       (< 1 (count args)) (concat `((~args (str ~path "?" (codec/form-encode ~(into {} (for [arg args] [(keyword arg) arg]))))))))]
+      `(let [handler# ~definition]
+         (swap! !routes assoc ~path {~method handler#})
+         handler#))))
+
 (defn start!
   "Start a webserver. If a server is already running, restarts it.
 
@@ -112,11 +148,11 @@
             (server/run-server (if (var? routes)
                                  (rr/reloading-ring-handler
                                   #(rr/ring-handler
-                                    (rr/router @routes)
+                                    (rr/router (concat (into [] @!routes) @routes))
                                     handle-not-found
                                     reitit-opts))
                                  (rr/ring-handler
-                                  (rr/router routes)
+                                  (rr/router (concat (into [] @!routes) @!routes routes))
                                   handle-not-found
                                   reitit-opts))
                                (merge {:port 7777}
