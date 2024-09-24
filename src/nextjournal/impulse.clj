@@ -5,6 +5,7 @@
             [nextjournal.garden-email :as garden-email]
             [nextjournal.garden-id :as garden-id]
             [org.httpkit.server :as server]
+            [reitit.core :as r]
             [reitit.ring :as rr]
             [ring.middleware.content-type :refer [wrap-content-type]]
             [ring.middleware.params :refer [wrap-params]]
@@ -99,10 +100,12 @@
   (str "/" symbol))
 
 (defonce !routes (atom {}))
+
 (defn request? [r]
   (and (map? r)
-       ;;FIXME
-       (contains? r :body)))
+       (contains? r :body)
+       (contains? r ::r/router)
+       (contains? r ::r/match)))
 
 (def ^:dynamic *req* nil)
 
