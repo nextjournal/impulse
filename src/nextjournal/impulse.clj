@@ -142,14 +142,14 @@
 
   When `routes` is a var, resolves it on every request, to allow interactive development."
   [routes opts]
-  (let [reitit-opts {:middleware [wrap-*req*
-                                  wrap-content-type
+  (let [reitit-opts {:middleware [wrap-content-type
                                   (fn [h] (wrap-session h {:store (memory-store session)}))
                                   (fn [h] (wrap-resource h "/"))
                                   wrap-params
                                   garden-id/wrap-auth
                                   garden-email/wrap-with-email
                                   wrap-hiccup
+                                  wrap-*req*
                                   wrap-save-request]}]
     (when-not (nil? @!server)
       (stop!))
