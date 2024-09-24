@@ -127,7 +127,7 @@
                          `(defn ~name
                             ([~req] (if (request? ~req)
                                       (let [{:strs ~args} (:query-params ~req)]
-                                        (binding [*req* ~req] ~@body))
+                                        ~@body)
                                       (str ~path "?" (codec/form-encode ~{(keyword (first args)) req})))))
                        (= 0 (count args)) (concat `((~args ~path)))
                        (< 1 (count args)) (concat `((~args (str ~path "?" (codec/form-encode ~(into {} (for [arg args] [(keyword arg) arg]))))))))]
