@@ -49,7 +49,7 @@
            :init {}))
 
 (defn wrap-hiccup
-  "Middleware that interprets anything enclosed in a vector as Hiccup, which it converts to an HTML string with an appropriate response envelop."
+  "Middleware that interprets anything enclosed in a vector as Hiccup, which it converts to an HTML string with an appropriate response envelope."
   [f]
   (fn [req]
     (let [res (f req)]
