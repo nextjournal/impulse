@@ -97,8 +97,7 @@
 (defn symbol->path
   "Turn a symbol into a urlsafe path"
   [symbol]
-  ;;FIXME
-  (str "/" symbol))
+  (str "/" (codec/url-encode symbol)))
 
 (defonce !routes (atom {}))
 
