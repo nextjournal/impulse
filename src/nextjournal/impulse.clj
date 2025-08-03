@@ -32,8 +32,8 @@
                     [:meta {:charset charset}]
                     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
                     [:meta {:name "color-scheme" :content "light dark"}]
-                    (include-js "htmx.org@2.0.2.js")
-                    (include-css "pico.min.css")]
+                    (include-js "/htmx.org@2.0.2.js")
+                    (include-css "/pico.min.css")]
                    head)
              [:body
               ;;TODO move to garden-email?
